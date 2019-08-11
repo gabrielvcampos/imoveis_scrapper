@@ -9,6 +9,7 @@ import scrapy
 
 
 class ImoveisCrawlerItem(scrapy.Item):
+    url = scrapy.Field()
     preco = scrapy.Field()
     area = scrapy.Field()
     quartos = scrapy.Field()
