@@ -2,7 +2,6 @@
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-import pdb
 
 class ZapimoveisSpider(CrawlSpider):
     name = 'zapimoveis'
@@ -16,5 +15,4 @@ class ZapimoveisSpider(CrawlSpider):
     )
 
     def parse_zap(self, response):
-        pdb.set_trace()
         print("IMOVEL")
