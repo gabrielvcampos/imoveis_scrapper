@@ -15,18 +15,36 @@ class ImovelwebSpider(CrawlSpider):
     )
 
     def parse_webimoveis(self, response):
-        url = response.request.url
-        area = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[1]/b/text()").extract_first()
-        banheiros = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[3]/b/text()").extract_first()
-        preco = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[1]/div[2]/span/text()").extract_first()
-        quartos = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[5]/b/text()").extract_first()
-        vagas_garagem = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[4]/b/text()").extract_first()
-        condominio = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[4]/span/text()").extract_first()
-        iptu = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[5]/span/text()").extract_first()
-        endereco = self.get_endereco(response)
-        imobiliaria = self.get_imobiliaria(response) 
-                             
+        eh_lancamento = response.xpath('//*[@id="sidebar-status-development"]/div/h3/b/text()').extract_first() != None
+        if eh_lancamento:
+            id_imovel = response.xpath("//div[contains(@class,'general-section') and contains(@class, 'publisher-section')]/span[@class='publisher-code'][2]/text()").extract_first()
+            url = response.request.url
+            area = response.xpath('//*[@id="sidebar-status-development"]/div/div[2]/div[1]/div[2]/span[2]/b/text()').extract_first()[:3].replace('m','')
+            banheiros = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[3]/b/text()").extract_first()
+            preco = response.xpath('//*[@id="sidebar-status-development"]/div/div[3]/div/div/span[2]/b/text()').extract_first()[3:]
+            quartos = response.xpath('//*[@id="sidebar-status-development"]/div/div[2]/div[2]/div[1]/span[2]/b/text()').extract_first()[:1]
+            vagas_garagem = response.xpath('//*[@id="sidebar-status-development"]/div/div[2]/div[2]/div[3]/span[2]/b/text()').extract_first()[:1]
+            condominio = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[4]/span/text()").extract_first()
+            iptu = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[5]/span/text()").extract_first()
+            endereco = response.xpath('//*[@id="development-head-container"]/div[2]/div[1]/div[2]/h2[2]/text()').extract_first()
+            imobiliaria = response.xpath('//*[@id="article-container"]/section[7]/div/div[1]/a/h3/b/text()').extract_first() 
+            caracteristicas =  response.xpath("//ul[@class='section-bullets']/li/h4/text()").extract()
+        else:
+            id_imovel = response.xpath("//div[contains(@class,'general-section') and contains(@class, 'publisher-section')]/span[@class='publisher-code'][2]/text()").extract_first()
+            url = response.request.url
+            area = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[1]/b/text()").extract_first()[:3]
+            banheiros = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[3]/b/text()").extract_first()
+            preco = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[1]/div[2]/span/text()").extract_first()[3:]
+            quartos = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[5]/b/text()").extract_first()
+            vagas_garagem = response.xpath("/html/body/div[1]/main/div/div/article/div/section[1]/ul/li[4]/b/text()").extract_first()
+            condominio = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[4]/span/text()").extract_first()
+            iptu = response.xpath("/html/body/div[1]/main/div/div/aside/div/div[1]/div/div[5]/span/text()").extract_first()
+            endereco = self.get_endereco(response)
+            imobiliaria = self.get_imobiliaria(response) 
+            caracteristicas =  response.xpath("//ul[@class='section-bullets']/li/h4/text()").extract()
+        
         yield {
+            'id_imovel': id_imovel,
             'url': url,
             'area': area,
             'banheiros': banheiros,
@@ -36,9 +54,12 @@ class ImovelwebSpider(CrawlSpider):
             'condominio': condominio,
             'iptu': iptu,
             'endereco': endereco,
-            'imobiliaria': imobiliaria
+            'imobiliaria': imobiliaria,
+            'plataforma': 'imovelweb',
+            'caracteristicas': caracteristicas
         }
-    
+
+        
     def get_imobiliaria(self , response):
         return response.css("html body#PROPERTY div#modal-hide-elements main div.layout-container div#main-container article.clearfix div#article-container section.general-section.article-section.publisher-section div.content-column div.column-left a h3.publisher-subtitle b::text").get()
     
